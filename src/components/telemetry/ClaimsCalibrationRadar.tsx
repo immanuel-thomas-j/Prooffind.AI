@@ -116,11 +116,11 @@ export const ClaimsCalibrationRadar: React.FC<ClaimsCalibrationRadarProps> = ({
     };
   }, [skills, analysis, profile]);
 
-  // SVG Geometry for Triangle Radar
-  // Center: (150, 140), Radius: 85
+  // SVG Geometry for Triangle Radar (Calculated with generous boundary padding)
+  // Center: (150, 115), Radius: 68
   const cx = 150;
-  const cy = 135;
-  const R = 85;
+  const cy = 115;
+  const R = 68;
 
   // Angles in radians:
   // Top: -PI/2 (Foundations)
@@ -276,25 +276,25 @@ export const ClaimsCalibrationRadar: React.FC<ClaimsCalibrationRadarProps> = ({
                 {/* Axis Labels */}
                 <text
                   x={cx}
-                  y={cy - R - 14}
+                  y={cy - R - 10}
                   textAnchor="middle"
-                  className="fill-slate-200 font-mono text-[11px] font-semibold tracking-wider"
+                  className="fill-slate-200 font-mono text-[10.5px] font-semibold tracking-wider"
                 >
                   Foundations
                 </text>
                 <text
-                  x={cx + R * Math.cos(angleCore) + 12}
-                  y={cy + R * Math.sin(angleCore) + 14}
-                  textAnchor="start"
-                  className="fill-slate-200 font-mono text-[11px] font-semibold tracking-wider"
+                  x={cx + R * Math.cos(angleCore) + 8}
+                  y={cy + R * Math.sin(angleCore) + 16}
+                  textAnchor="middle"
+                  className="fill-slate-200 font-mono text-[10.5px] font-semibold tracking-wider"
                 >
                   Core practice
                 </text>
                 <text
-                  x={cx + R * Math.cos(angleApplied) - 12}
-                  y={cy + R * Math.sin(angleApplied) + 14}
-                  textAnchor="end"
-                  className="fill-slate-200 font-mono text-[11px] font-semibold tracking-wider"
+                  x={cx + R * Math.cos(angleApplied) - 8}
+                  y={cy + R * Math.sin(angleApplied) + 16}
+                  textAnchor="middle"
+                  className="fill-slate-200 font-mono text-[10.5px] font-semibold tracking-wider"
                 >
                   Applied work
                 </text>
