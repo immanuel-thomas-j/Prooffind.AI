@@ -126,9 +126,6 @@ function DashboardContent() {
               {profile?.name || user?.name || "Candidate Profile"}
             </h1>
             <Badge type="neutral" value={profile?.experienceLevel || "Intermediate"} size="sm" />
-            <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
-              Supabase Live
-            </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl font-medium">
             Target Role: <span className="text-slate-900 font-semibold">{profile?.targetRole || "Systems Engineer"}</span>
