@@ -215,90 +215,135 @@ export const ClaimsCalibrationRadar: React.FC<ClaimsCalibrationRadarProps> = ({
 
           {/* Center Column: Radar Chart (4 cols) */}
           <div className="lg:col-span-4 flex items-center justify-center">
-            <div className="relative p-4 bg-slate-950 text-white rounded-2xl border border-slate-800 shadow-md w-full max-w-[320px] flex items-center justify-center overflow-hidden">
-              <svg width="100%" height="210" viewBox="0 0 340 230" className="overflow-visible select-none">
-                {/* Concentric Guide Triangles */}
-                {[0.33, 0.66, 1.0].map((step, idx) => {
-                  const pts = polyString(step, step, step);
-                  return (
-                    <polygon
-                      key={idx}
-                      points={pts}
-                      fill="none"
-                      stroke="#1E293B"
-                      strokeWidth={idx === 2 ? "1.5" : "1"}
-                      strokeDasharray={idx < 2 ? "3 3" : undefined}
-                    />
-                  );
-                })}
+            <div className="relative p-5 bg-slate-950 text-white rounded-2xl border border-slate-800 shadow-md w-full max-w-[340px] flex flex-col items-center justify-between">
+              {/* Top Label: Foundations */}
+              <div className="text-center font-mono text-[11px] font-bold tracking-wider text-slate-200">
+                Foundations
+              </div>
 
-                {/* Radial Axis Lines */}
-                {[angleFoundations, angleCore, angleApplied].map((ang, i) => {
-                  const outer = getPoint(1.0, ang);
-                  return (
-                    <line
-                      key={i}
-                      x1={cx}
-                      y1={cy}
-                      x2={outer.x}
-                      y2={outer.y}
-                      stroke="#334155"
-                      strokeWidth="1"
-                    />
-                  );
-                })}
+              {/* Radar Chart Visual */}
+              <div className="relative w-full flex items-center justify-center my-1">
+                <svg width="220" height="170" viewBox="0 0 220 170" className="overflow-visible select-none">
+                  {/* Concentric Guide Triangles */}
+                  {[0.33, 0.66, 1.0].map((step, idx) => {
+                    const cX = 110;
+                    const cY = 95;
+                    const rad = 65;
+                    const getP = (r: number, ang: number) => ({
+                      x: cX + r * rad * Math.cos(ang),
+                      y: cY + r * rad * Math.sin(ang),
+                    });
+                    const p1 = getP(step, -Math.PI / 2);
+                    const p2 = getP(step, Math.PI / 6);
+                    const p3 = getP(step, (5 * Math.PI) / 6);
+                    const pts = `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y}`;
 
-                {/* 1. Required Area (Red dashed) */}
-                <polygon
-                  points={requiredPolygon}
-                  fill="rgba(239, 68, 68, 0.08)"
-                  stroke="#EF4444"
-                  strokeWidth="1.8"
-                  strokeDasharray="4 4"
-                />
+                    return (
+                      <polygon
+                        key={idx}
+                        points={pts}
+                        fill="none"
+                        stroke="#1E293B"
+                        strokeWidth={idx === 2 ? "1.5" : "1"}
+                        strokeDasharray={idx < 2 ? "3 3" : undefined}
+                      />
+                    );
+                  })}
 
-                {/* 2. Claimed Area (Amber) */}
-                <polygon
-                  points={claimedPolygon}
-                  fill="rgba(245, 158, 11, 0.28)"
-                  stroke="#F59E0B"
-                  strokeWidth="1.8"
-                />
+                  {/* Radial Axis Lines */}
+                  {[-Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6].map((ang, i) => {
+                    const cX = 110;
+                    const cY = 95;
+                    const rad = 65;
+                    const out = {
+                      x: cX + rad * Math.cos(ang),
+                      y: cY + rad * Math.sin(ang),
+                    };
+                    return (
+                      <line
+                        key={i}
+                        x1={cX}
+                        y1={cY}
+                        x2={out.x}
+                        y2={out.y}
+                        stroke="#334155"
+                        strokeWidth="1"
+                      />
+                    );
+                  })}
 
-                {/* 3. Evidenced Area (Green) */}
-                <polygon
-                  points={evidencedPolygon}
-                  fill="rgba(16, 185, 129, 0.45)"
-                  stroke="#10B981"
-                  strokeWidth="2"
-                />
+                  {/* Polygon helper */}
+                  {(() => {
+                    const cX = 110;
+                    const cY = 95;
+                    const rad = 65;
+                    const getP = (r: number, ang: number) => {
+                      const clamped = Math.max(0.05, Math.min(1, r));
+                      return {
+                        x: cX + clamped * rad * Math.cos(ang),
+                        y: cY + clamped * rad * Math.sin(ang),
+                      };
+                    };
+                    const getPoly = (f: number, c: number, a: number) => {
+                      const p1 = getP(f, -Math.PI / 2);
+                      const p2 = getP(c, Math.PI / 6);
+                      const p3 = getP(a, (5 * Math.PI) / 6);
+                      return `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y}`;
+                    };
 
-                {/* Axis Labels */}
-                <text
-                  x={cx}
-                  y={cy - R - 12}
-                  textAnchor="middle"
-                  className="fill-slate-200 font-mono text-[11px] font-semibold tracking-wider"
-                >
-                  Foundations
-                </text>
-                <text
-                  x={cx + R * Math.cos(angleCore) + 12}
-                  y={cy + R * Math.sin(angleCore) + 18}
-                  textAnchor="end"
-                  className="fill-slate-200 font-mono text-[11px] font-semibold tracking-wider"
-                >
-                  Core practice
-                </text>
-                <text
-                  x={cx + R * Math.cos(angleApplied) - 12}
-                  y={cy + R * Math.sin(angleApplied) + 18}
-                  textAnchor="start"
-                  className="fill-slate-200 font-mono text-[11px] font-semibold tracking-wider"
-                >
-                  Applied work
-                </text>
-              </svg>
+                    const reqPoly = getPoly(
+                      radarMetrics.foundations.required,
+                      radarMetrics.corePractice.required,
+                      radarMetrics.appliedWork.required
+                    );
+                    const claimPoly = getPoly(
+                      radarMetrics.foundations.claimed,
+                      radarMetrics.corePractice.claimed,
+                      radarMetrics.appliedWork.claimed
+                    );
+                    const evidPoly = getPoly(
+                      radarMetrics.foundations.evidenced,
+                      radarMetrics.corePractice.evidenced,
+                      radarMetrics.appliedWork.evidenced
+                    );
+
+                    return (
+                      <>
+                        {/* 1. Required Area (Red dashed) */}
+                        <polygon
+                          points={reqPoly}
+                          fill="rgba(239, 68, 68, 0.08)"
+                          stroke="#EF4444"
+                          strokeWidth="1.8"
+                          strokeDasharray="4 4"
+                        />
+
+                        {/* 2. Claimed Area (Amber) */}
+                        <polygon
+                          points={claimPoly}
+                          fill="rgba(245, 158, 11, 0.28)"
+                          stroke="#F59E0B"
+                          strokeWidth="1.8"
+                        />
+
+                        {/* 3. Evidenced Area (Green) */}
+                        <polygon
+                          points={evidPoly}
+                          fill="rgba(16, 185, 129, 0.45)"
+                          stroke="#10B981"
+                          strokeWidth="2"
+                        />
+                      </>
+                    );
+                  })()}
+                </svg>
+              </div>
+
+              {/* Bottom Labels: Applied Work on Left, Core Practice on Right */}
+              <div className="w-full flex items-center justify-between font-mono text-[11px] font-bold tracking-wider text-slate-200 px-1 pt-1">
+                <span>Applied work</span>
+                <span>Core practice</span>
+              </div>
             </div>
           </div>
 
