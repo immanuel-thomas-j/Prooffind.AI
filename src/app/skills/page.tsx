@@ -60,8 +60,8 @@ function SkillsContent() {
           setSelectedSkill(sks[1] || sks[0]);
         }
 
-        if (prof && sks.length > 0) {
-          const res = EvidenceService.analyzeSkills(sks, prof.selfReportedSkills, evs);
+        if (sks.length > 0) {
+          const res = EvidenceService.analyzeSkills(sks, prof?.selfReportedSkills || [], evs);
           setAnalyses(res);
         }
       } catch (err) {

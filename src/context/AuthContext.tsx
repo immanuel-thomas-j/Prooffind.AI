@@ -326,7 +326,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           learningGoal: `Validate genuine ${targetRole || "engineering"} competencies.`,
           experienceLevel: "Intermediate",
           programmingLanguages: ["TypeScript", "Python"],
-          selfReportedSkills: ["Core Data Structures & Memory Layouts"],
+          selfReportedSkills: [],
           preferredLearningHoursPerWeek: 10,
           aiAssistancePreference: "balanced",
           isDemoUser: false,

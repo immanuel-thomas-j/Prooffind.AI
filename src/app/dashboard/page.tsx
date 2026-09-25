@@ -69,8 +69,8 @@ function DashboardContent() {
         setEvidenceList(evs);
         setResults(resList);
 
-        if (prof && sks.length > 0) {
-          const calculated = EvidenceService.analyzeSkills(sks, prof.selfReportedSkills, evs);
+        if (sks.length > 0) {
+          const calculated = EvidenceService.analyzeSkills(sks, prof?.selfReportedSkills || [], evs);
           setAnalyses(calculated);
         }
       } catch (err) {
