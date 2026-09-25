@@ -46,11 +46,8 @@ export const Sidebar: React.FC = () => {
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div className="min-w-0">
-            <div className="font-bold text-sm text-slate-900 tracking-tight leading-none">
+            <div className="font-bold text-base text-slate-900 tracking-tight leading-none">
               ProofPath<span className="text-blue-600">.AI</span>
-            </div>
-            <div className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-1">
-              Evidence Engine
             </div>
           </div>
         </Link>
