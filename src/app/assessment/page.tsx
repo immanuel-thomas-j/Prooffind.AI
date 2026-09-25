@@ -75,38 +75,7 @@ function AssessmentListContent() {
         </p>
       </div>
 
-      {/* 3 Conditions Explanation Cards in Row (Matching Image 2) */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs shadow-xs">
-        <div className="flex items-start gap-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200/80 flex-shrink-0">
-            <Sparkles className="w-3 h-3 text-amber-600" />
-            <span>AI Disclosure Required</span>
-          </span>
-          <span className="text-slate-600 leading-relaxed text-[11px]">
-            AI tools permitted, provided all prompts and generated snippets are disclosed upon submission.
-          </span>
-        </div>
 
-        <div className="flex items-start gap-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-200/80 flex-shrink-0">
-            <Lock className="w-3 h-3 text-rose-600" />
-            <span>AI Restricted Mode</span>
-          </span>
-          <span className="text-slate-600 leading-relaxed text-[11px]">
-            Independent demonstration without automated assistants or code generation tools.
-          </span>
-        </div>
-
-        <div className="flex items-start gap-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-800 border border-purple-200/80 flex-shrink-0">
-            <Clock className="w-3 h-3 text-purple-600" />
-            <span>Practice Mode</span>
-          </span>
-          <span className="text-slate-600 leading-relaxed text-[11px]">
-            Nexus AI mentor is available for hints and feedback without score penalties.
-          </span>
-        </div>
-      </div>
 
       {/* Assessment Challenge Cards Grid (Matching Image 2) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
