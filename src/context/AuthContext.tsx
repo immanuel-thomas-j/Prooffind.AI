@@ -119,6 +119,72 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setProfile(prof);
   };
 
+  const syncUserRecord = async (activeUserId: string, cleanEmail: string, authName: string) => {
+    try {
+      const { data: existingUser } = await supabase
+        .from("users")
+        .select("id, email")
+        .eq("email", cleanEmail)
+        .maybeSingle();
+
+      if (existingUser) {
+        if (existingUser.id !== activeUserId) {
+          const oldId = existingUser.id;
+          // Temporarily alter old email to prevent unique constraint conflict
+          await supabase.from("users").update({ email: `${cleanEmail}.legacy-${Date.now()}` }).eq("id", oldId);
+          // Insert the canonical auth UUID record
+          await supabase.from("users").insert({
+            id: activeUserId,
+            email: cleanEmail,
+            name: authName,
+            role: "learner",
+            updated_at: new Date().toISOString(),
+          });
+          // Re-link all related data to the active UUID
+          await Promise.allSettled([
+            supabase.from("learner_profiles").update({ user_id: activeUserId }).eq("user_id", oldId),
+            supabase.from("evidence_items").update({ user_id: activeUserId }).eq("user_id", oldId),
+            supabase.from("assessment_attempts").update({ user_id: activeUserId }).eq("user_id", oldId),
+            supabase.from("assessment_results").update({ user_id: activeUserId }).eq("user_id", oldId),
+            supabase.from("learning_paths").update({ user_id: activeUserId }).eq("user_id", oldId),
+            supabase.from("mentor_conversations").update({ user_id: activeUserId }).eq("user_id", oldId),
+          ]);
+          // Clean up old record
+          await supabase.from("users").delete().eq("id", oldId);
+        } else {
+          await supabase.from("users").update({
+            name: authName,
+            updated_at: new Date().toISOString(),
+          }).eq("id", activeUserId);
+        }
+      } else {
+        const { data: existingById } = await supabase
+          .from("users")
+          .select("id")
+          .eq("id", activeUserId)
+          .maybeSingle();
+
+        if (existingById) {
+          await supabase.from("users").update({
+            email: cleanEmail,
+            name: authName,
+            updated_at: new Date().toISOString(),
+          }).eq("id", activeUserId);
+        } else {
+          await supabase.from("users").insert({
+            id: activeUserId,
+            email: cleanEmail,
+            name: authName,
+            role: "learner",
+            updated_at: new Date().toISOString(),
+          });
+        }
+      }
+    } catch (syncErr) {
+      console.warn("User sync notice (non-fatal):", syncErr);
+    }
+  };
+
   const login = async (email: string, password?: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     try {
@@ -134,9 +200,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         if (error) {
-          // If direct password fails on Supabase Auth, report exact error or check custom user record
           console.warn("Supabase auth notice:", error.message);
-          return { success: false, error: error.message || "Invalid credentials." };
+          let userMsg = error.message;
+          if (error.message.toLowerCase().includes("invalid login credentials")) {
+            userMsg = "Invalid email or password. If you don't have an account yet, please switch to 'Create Candidate Account'.";
+          } else if (error.message.toLowerCase().includes("email not confirmed")) {
+            userMsg = "Email address has not been confirmed. Please check your inbox or sign up again.";
+          }
+          return { success: false, error: userMsg };
         }
 
         if (data?.user) {
@@ -152,14 +223,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             localStorage.setItem(AUTH_USER_KEY, JSON.stringify(authUser));
           }
 
-          // Ensure user record exists in users table
-          await supabase.from("users").upsert({
-            id: activeUserId,
-            email: cleanEmail,
-            name: authName,
-            role: "learner",
-            updated_at: new Date().toISOString(),
-          }, { onConflict: "id" });
+          // Ensure user record exists in users table cleanly
+          await syncUserRecord(activeUserId, cleanEmail, authName);
 
           const prof = await learnerRepo.getProfile(activeUserId);
           setProfile(prof);
@@ -171,13 +236,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const derivedId = `user-${cleanEmail.replace(/[^a-z0-9]/g, "-")}`;
       const name = cleanEmail.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
-      await supabase.from("users").upsert({
-        id: derivedId,
-        email: cleanEmail,
-        name,
-        role: "learner",
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "id" });
+      await syncUserRecord(derivedId, cleanEmail, name);
 
       const authUser: AuthUser = {
         id: derivedId,
@@ -229,42 +288,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (error) {
           console.warn("Supabase auth signup notice:", error.message);
-          if (!error.message.toLowerCase().includes("already registered")) {
+          if (
+            error.message.toLowerCase().includes("already registered") ||
+            error.message.toLowerCase().includes("already exists")
+          ) {
+            // Attempt auto-login if account exists
+            const autoLogin = await supabase.auth.signInWithPassword({
+              email: cleanEmail,
+              password,
+            });
+            if (autoLogin.data?.user) {
+              activeUserId = autoLogin.data.user.id;
+            } else {
+              return {
+                success: false,
+                error: "This email is already registered. Please switch to 'Sign In' and enter your password.",
+              };
+            }
+          } else {
             return { success: false, error: error.message };
           }
-        }
-
-        if (data?.user?.id) {
+        } else if (data?.user?.id) {
           activeUserId = data.user.id;
         }
       }
 
-      // Upsert into users table
-      await supabase.from("users").upsert({
-        id: activeUserId,
-        email: cleanEmail,
-        name: name.trim(),
-        role: "learner",
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "id" });
+      // Sync cleanly into users table
+      await syncUserRecord(activeUserId, cleanEmail, name.trim());
 
-      const newProfile: LearnerProfile = {
-        id: `profile-${activeUserId}`,
-        userId: activeUserId,
-        name: name.trim(),
-        targetRole: targetRole || "Software Engineer",
-        learningGoal: `Validate genuine ${targetRole || "engineering"} competencies.`,
-        experienceLevel: "Intermediate",
-        programmingLanguages: ["TypeScript", "Python"],
-        selfReportedSkills: ["Core Data Structures & Memory Layouts"],
-        preferredLearningHoursPerWeek: 10,
-        aiAssistancePreference: "balanced",
-        isDemoUser: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      await learnerRepo.saveProfile(newProfile);
+      let userProfile = await learnerRepo.getProfile(activeUserId);
+      if (!userProfile) {
+        const newProfile: LearnerProfile = {
+          id: `profile-${activeUserId}`,
+          userId: activeUserId,
+          name: name.trim(),
+          targetRole: targetRole || "Software Engineer",
+          learningGoal: `Validate genuine ${targetRole || "engineering"} competencies.`,
+          experienceLevel: "Intermediate",
+          programmingLanguages: ["TypeScript", "Python"],
+          selfReportedSkills: ["Core Data Structures & Memory Layouts"],
+          preferredLearningHoursPerWeek: 10,
+          aiAssistancePreference: "balanced",
+          isDemoUser: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        await learnerRepo.saveProfile(newProfile);
+        userProfile = newProfile;
+      }
 
       const authUser: AuthUser = {
         id: activeUserId,
@@ -273,7 +344,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
 
       setUser(authUser);
-      setProfile(newProfile);
+      setProfile(userProfile);
       if (typeof window !== "undefined") {
         localStorage.setItem(AUTH_USER_KEY, JSON.stringify(authUser));
       }
