@@ -179,21 +179,42 @@ export const ClaimsCalibrationRadar: React.FC<ClaimsCalibrationRadarProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Main Hero Calibration Card */}
-      <div className="bg-[#0B0F17] text-white border border-slate-800 rounded-2xl p-6 shadow-xl">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-base sm:text-lg font-bold tracking-tight text-white mb-1">
-            Claims vs evidence vs requirement
-          </h2>
-          <p className="text-xs text-slate-400 leading-relaxed font-sans mb-3">
-            <span className="text-amber-400 font-semibold">Amber</span> = what you claim •{" "}
-            <span className="text-emerald-400 font-semibold">green</span> = what your data proves •{" "}
-            <span className="text-rose-400 font-semibold">red dashes</span> = what your goal demands.
-          </p>
+      {/* Compact Calibration Hero Section */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          {/* Left Info Column */}
+          <div className="space-y-3 md:max-w-xs">
+            <div>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-600 block">
+                Triangulated Calibration
+              </span>
+              <h2 className="text-base font-bold tracking-tight text-slate-900 mt-0.5">
+                Claims vs Evidence vs Requirement
+              </h2>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed font-sans">
+              Compares your declared capabilities against verified sandbox results and target role benchmarks across 3 key engineering axes.
+            </p>
+            {/* Legend */}
+            <div className="space-y-1.5 pt-1 text-xs font-mono">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-xs bg-amber-500 shrink-0" />
+                <span className="text-slate-700 font-semibold text-[11px]">Claimed (Self-Reported)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-xs bg-emerald-500 shrink-0" />
+                <span className="text-slate-700 font-semibold text-[11px]">Evidenced (Tested/Verified)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-0.5 border-t-2 border-dashed border-rose-500 shrink-0" />
+                <span className="text-slate-700 font-semibold text-[11px]">Required (Target Benchmark)</span>
+              </div>
+            </div>
+          </div>
 
-          {/* Radar Spider/Triangle Chart */}
-          <div className="relative flex items-center justify-center py-2">
-            <svg width="340" height="260" viewBox="0 0 340 260" className="overflow-visible select-none">
+          {/* Centered Radar Chart */}
+          <div className="relative flex items-center justify-center p-2 bg-slate-950 text-white rounded-xl border border-slate-800 shadow-inner">
+            <svg width="270" height="210" viewBox="0 0 270 210" className="overflow-visible select-none">
               {/* Concentric Guide Triangles */}
               {[0.33, 0.66, 1.0].map((step, idx) => {
                 const pts = polyString(step, step, step);
@@ -230,8 +251,8 @@ export const ClaimsCalibrationRadar: React.FC<ClaimsCalibrationRadarProps> = ({
                 points={requiredPolygon}
                 fill="rgba(239, 68, 68, 0.08)"
                 stroke="#EF4444"
-                strokeWidth="1.8"
-                strokeDasharray="4 4"
+                strokeWidth="1.6"
+                strokeDasharray="3 3"
               />
 
               {/* 2. Claimed Area (Amber) */}
@@ -253,45 +274,48 @@ export const ClaimsCalibrationRadar: React.FC<ClaimsCalibrationRadarProps> = ({
               {/* Axis Labels */}
               <text
                 x={cx}
-                y={cy - R - 14}
+                y={cy - R - 12}
                 textAnchor="middle"
-                className="fill-slate-300 font-mono text-[11px] font-semibold tracking-wider"
+                className="fill-slate-300 font-mono text-[10px] font-semibold tracking-wider"
               >
                 Foundations
               </text>
               <text
-                x={cx + R * Math.cos(angleCore) + 12}
-                y={cy + R * Math.sin(angleCore) + 14}
+                x={cx + R * Math.cos(angleCore) + 10}
+                y={cy + R * Math.sin(angleCore) + 12}
                 textAnchor="start"
-                className="fill-slate-300 font-mono text-[11px] font-semibold tracking-wider"
+                className="fill-slate-300 font-mono text-[10px] font-semibold tracking-wider"
               >
                 Core practice
               </text>
               <text
-                x={cx + R * Math.cos(angleApplied) - 12}
-                y={cy + R * Math.sin(angleApplied) + 14}
+                x={cx + R * Math.cos(angleApplied) - 10}
+                y={cy + R * Math.sin(angleApplied) + 12}
                 textAnchor="end"
-                className="fill-slate-300 font-mono text-[11px] font-semibold tracking-wider"
+                className="fill-slate-300 font-mono text-[10px] font-semibold tracking-wider"
               >
                 Applied work
               </text>
             </svg>
           </div>
 
-          {/* Legend */}
-          <div className="flex flex-wrap items-center justify-center gap-6 pt-3 border-t border-slate-800 text-xs font-mono">
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-xs bg-amber-500" />
-              <span className="text-slate-300">Claimed</span>
+          {/* Right Summary / Quick Audit */}
+          <div className="space-y-2 md:max-w-xs w-full">
+            <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-xl space-y-1">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-800 block">
+                Discrepancy Status
+              </span>
+              <p className="text-xs text-amber-900 font-medium leading-relaxed">
+                {skillsGap.length} skill{skillsGap.length === 1 ? "" : "s"} need hands-on calibration to convert claims into proven proof.
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-xs bg-emerald-500" />
-              <span className="text-slate-300">Evidenced</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-0.5 border-t-2 border-dashed border-rose-500" />
-              <span className="text-slate-300">Required</span>
-            </div>
+            <Link
+              href="/assessment"
+              className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs transition-colors"
+            >
+              <span>Take Calibration Assessment</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
       </div>
