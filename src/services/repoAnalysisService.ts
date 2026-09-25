@@ -1,6 +1,28 @@
 import { EvidenceCategory, EvidenceItem, EvidenceType } from "../domain/types";
 import { GroqService } from "./groqService";
 
+export const VALID_SKILL_IDS = [
+  "skill-ds-01",
+  "skill-hash-02",
+  "skill-concurrency-03",
+  "skill-cache-04",
+  "skill-api-05",
+  "skill-db-06",
+] as const;
+
+export function sanitizeSkillId(rawId?: string, fallback: string = "skill-hash-02"): string {
+  if (!rawId) return fallback;
+  const clean = rawId.trim().toLowerCase();
+  if (VALID_SKILL_IDS.includes(clean as any)) return clean;
+  if (clean.includes("data-structure") || clean.includes("ds") || clean.includes("memory") || clean.includes("array")) return "skill-ds-01";
+  if (clean.includes("hash") || clean.includes("collision") || clean.includes("map") || clean.includes("set")) return "skill-hash-02";
+  if (clean.includes("concurr") || clean.includes("thread") || clean.includes("mutex") || clean.includes("race") || clean.includes("lock")) return "skill-concurrency-03";
+  if (clean.includes("cache") || clean.includes("redis") || clean.includes("invalidat") || clean.includes("distribut")) return "skill-cache-04";
+  if (clean.includes("api") || clean.includes("rest") || clean.includes("http") || clean.includes("idempot") || clean.includes("endpoint")) return "skill-api-05";
+  if (clean.includes("db") || clean.includes("database") || clean.includes("sql") || clean.includes("index") || clean.includes("query")) return "skill-db-06";
+  return fallback;
+}
+
 export interface RepoPatternDetected {
   name: string;
   files: string[];
@@ -544,7 +566,7 @@ Respond ONLY with valid JSON matching this schema:
   "recommendedCalibrationTitle": "Hash Tables & Invariants Calibration"
 }`;
 
-    return await GroqService.callJson<RepoAnalysisResult>({
+    const result = await GroqService.callJson<RepoAnalysisResult>({
       messages: [
         { role: "system", content: "You are an objective AST and repository telemetry analyzer evaluating genuine repository data. Output valid JSON only." },
         { role: "user", content: prompt },
@@ -552,6 +574,21 @@ Respond ONLY with valid JSON matching this schema:
       temperature: 0.2,
       maxTokens: 1200,
     });
+
+    if (result && Array.isArray(result.extractedEvidence)) {
+      result.extractedEvidence = result.extractedEvidence.map((ev) => ({
+        ...ev,
+        skillId: sanitizeSkillId(ev.skillId),
+      }));
+    }
+    if (result && Array.isArray(result.architecturePatterns)) {
+      result.architecturePatterns = result.architecturePatterns.map((p) => ({
+        ...p,
+        associatedSkillId: sanitizeSkillId(p.associatedSkillId),
+      }));
+    }
+
+    return result;
   }
 
   public static analyzeDeterministic(repoUrl: string): RepoAnalysisResult {
@@ -762,12 +799,18 @@ Return ONLY a JSON object matching this schema:
       });
 
       const parsed = JSON.parse(raw);
+      const rawSkills = Array.isArray(parsed.detectedSkills) ? parsed.detectedSkills : [];
+      const sanitizedSkills = rawSkills.map((sk: any) => ({
+        ...sk,
+        skillId: sanitizeSkillId(sk.skillId),
+      }));
+
       return {
         sourceType,
         sourceUrl,
         title: parsed.title || defaultTitle,
         summary: parsed.summary || "Artifact inspected with static telemetry. Extracted candidate competencies quarantined under INFERRED status.",
-        detectedSkills: parsed.detectedSkills || [
+        detectedSkills: sanitizedSkills.length > 0 ? sanitizedSkills : [
           {
             skillId: "skill-hash-02",
             skillName: "Hash Tables & Collision Resolution",

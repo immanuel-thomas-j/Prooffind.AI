@@ -1,5 +1,6 @@
 import { GroqService } from "./groqService";
 import { EvidenceCategory, EvidenceType } from "../domain/types";
+import { sanitizeSkillId } from "./repoAnalysisService";
 
 export interface LiveInspectionResult {
   sourceType: "GITHUB" | "LEETCODE" | "CERTIFICATION" | "PORTFOLIO";
@@ -162,6 +163,9 @@ Return ONLY a JSON object:
         });
 
         const parsed = JSON.parse(raw);
+        const parsedSkills = Array.isArray(parsed.detectedSkills)
+          ? parsed.detectedSkills.map((s: any) => ({ ...s, skillId: sanitizeSkillId(s.skillId) }))
+          : [];
         return {
           sourceType: "GITHUB",
           sourceUrl: `https://github.com/${owner}/${repo}`,
@@ -174,7 +178,7 @@ Return ONLY a JSON object:
             commitsCount: commitMessages.length,
             fileCount: fileNames.length,
           },
-          detectedSkills: parsed.detectedSkills || [],
+          detectedSkills: parsedSkills,
           signalMatrix: parsed.signalMatrix || [],
           aiRiskLevel: parsed.aiRiskLevel || "LOW",
           aiRiskRationale: parsed.aiRiskRationale || "Commit history inspected via live GitHub API.",
@@ -279,13 +283,16 @@ Evaluate these real public repositories under ProofPath principles. Return ONLY 
         temperature: 0.2,
       });
       const parsed = JSON.parse(raw);
+      const parsedUserSkills = Array.isArray(parsed.detectedSkills)
+        ? parsed.detectedSkills.map((s: any) => ({ ...s, skillId: sanitizeSkillId(s.skillId) }))
+        : [];
       return {
         sourceType: "GITHUB",
         sourceUrl: `https://github.com/${owner}`,
         title: parsed.title || `GitHub Profile: @${owner}`,
         summary: parsed.summary || `Candidate has ${Array.isArray(reposData) ? reposData.length : 0} public repositories.`,
         isFound: true,
-        detectedSkills: parsed.detectedSkills || [],
+        detectedSkills: parsedUserSkills,
         signalMatrix: parsed.signalMatrix || [],
         aiRiskLevel: parsed.aiRiskLevel || "LOW",
         aiRiskRationale: parsed.aiRiskRationale || "Inspected live repositories on GitHub.",
@@ -430,6 +437,9 @@ Return ONLY JSON:
         temperature: 0.2,
       });
       const parsed = JSON.parse(raw);
+      const parsedLCSkills = Array.isArray(parsed.detectedSkills)
+        ? parsed.detectedSkills.map((s: any) => ({ ...s, skillId: sanitizeSkillId(s.skillId) }))
+        : [];
       return {
         sourceType: "LEETCODE",
         sourceUrl: `https://leetcode.com/u/${username}/`,
@@ -437,7 +447,7 @@ Return ONLY JSON:
         summary: parsed.summary || `Candidate has verified ${total} solved problems on LeetCode (Medium: ${medium}, Hard: ${hard}).`,
         isFound: true,
         rawMetadata: { totalSolved: total, easySolved: easy, mediumSolved: medium, hardSolved: hard },
-        detectedSkills: parsed.detectedSkills || [],
+        detectedSkills: parsedLCSkills,
         signalMatrix: parsed.signalMatrix || [],
         aiRiskLevel: parsed.aiRiskLevel || "LOW",
         aiRiskRationale: parsed.aiRiskRationale || "Problem counts verified via live LeetCode endpoint.",
@@ -596,6 +606,9 @@ Return ONLY JSON:
         temperature: 0.2,
       });
       const parsed = JSON.parse(raw);
+      const parsedWebSkills = Array.isArray(parsed.detectedSkills)
+        ? parsed.detectedSkills.map((s: any) => ({ ...s, skillId: sanitizeSkillId(s.skillId) }))
+        : [];
       return {
         sourceType: "PORTFOLIO",
         sourceUrl: url,
@@ -603,7 +616,7 @@ Return ONLY JSON:
         summary: parsed.summary || metaDesc || `Inspected live webpage at ${url}.`,
         isFound: true,
         rawMetadata: { pageTitle, metaDesc, charCount: bodyText.length },
-        detectedSkills: parsed.detectedSkills || [],
+        detectedSkills: parsedWebSkills,
         signalMatrix: parsed.signalMatrix || [],
         aiRiskLevel: parsed.aiRiskLevel || "LOW",
         aiRiskRationale: parsed.aiRiskRationale || "Content fetched directly from live web server.",
@@ -692,13 +705,16 @@ Return ONLY JSON:
         temperature: 0.2,
       });
       const parsed = JSON.parse(raw);
+      const parsedCertSkills = Array.isArray(parsed.detectedSkills)
+        ? parsed.detectedSkills.map((s: any) => ({ ...s, skillId: sanitizeSkillId(s.skillId) }))
+        : [];
       return {
         sourceType: "CERTIFICATION",
         sourceUrl: input,
         title: parsed.title || `Certificate Verification: ${input}`,
         summary: parsed.summary || "Certificate accreditation claim inspected.",
         isFound: true,
-        detectedSkills: parsed.detectedSkills || [],
+        detectedSkills: parsedCertSkills,
         signalMatrix: parsed.signalMatrix || [],
         aiRiskLevel: parsed.aiRiskLevel || "LOW",
         aiRiskRationale: parsed.aiRiskRationale || "Certification examined.",

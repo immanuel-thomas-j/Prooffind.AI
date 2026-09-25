@@ -109,27 +109,27 @@ function NexusMentorContent() {
   const currentModeInfo = MODES.find((m) => m.id === activeMode);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 h-[calc(100vh-3.5rem)] flex flex-col space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
-              <Bot className="w-8 h-8 text-blue-600" />
+              <Bot className="w-7 h-7 text-blue-600" />
               <span>Nexus AI Systems Mentor</span>
             </h1>
             <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-semibold font-mono">
               Socratic Engine
             </span>
           </div>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-xs sm:text-sm text-slate-600">
             A mentor engineered to probe understanding, uncover trade-offs, and guide deliberate practice without completing your tasks for you.
           </p>
         </div>
 
         <button
           onClick={handleClear}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-600 hover:text-slate-900 border border-slate-300 bg-white hover:bg-slate-50 rounded-lg shadow-xs transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-600 hover:text-slate-900 border border-slate-300 bg-white hover:bg-slate-50 rounded-lg shadow-xs transition-colors self-start sm:self-auto"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span>Reset Chat</span>
@@ -137,14 +137,14 @@ function NexusMentorContent() {
       </div>
 
       {/* Mode Selector Tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 shrink-0">
         {MODES.map((m) => {
           const isActive = m.id === activeMode;
           return (
             <button
               key={m.id}
               onClick={() => setActiveMode(m.id)}
-              className={`p-3 text-left rounded-xl border text-xs transition-all shadow-xs ${
+              className={`p-2.5 text-left rounded-xl border text-xs transition-all shadow-xs ${
                 isActive
                   ? "bg-blue-600 border-blue-600 text-white shadow-xs"
                   : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50"
@@ -158,9 +158,9 @@ function NexusMentorContent() {
       </div>
 
       {/* Chat Container */}
-      <Card className="p-6 h-[580px] flex flex-col justify-between space-y-4 bg-white border border-slate-200 shadow-xs">
+      <Card className="flex-1 min-h-0 flex flex-col p-4 sm:p-6 bg-white border border-slate-200 shadow-xs overflow-hidden">
         {/* Messages Scroll Area */}
-        <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-2 scroll-smooth">
           {messages.map((msg) => {
             const isUser = msg.sender === "user";
             return (
@@ -227,7 +227,7 @@ function NexusMentorContent() {
         </div>
 
         {/* Input Bar */}
-        <div className="pt-3 border-t border-slate-100">
+        <div className="pt-3 mt-2 border-t border-slate-100 shrink-0">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -245,7 +245,7 @@ function NexusMentorContent() {
             <button
               type="submit"
               disabled={!inputText.trim() || isTyping}
-              className="p-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white rounded-xl shadow-xs transition-colors"
+              className="p-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white rounded-xl shadow-xs transition-colors shrink-0"
               aria-label="Send message"
             >
               <Send className="w-4 h-4" />

@@ -200,6 +200,28 @@ export class SupabaseSkillRepository implements ISkillRepository {
   }
 }
 
+export const VALID_SKILL_IDS = [
+  "skill-ds-01",
+  "skill-hash-02",
+  "skill-concurrency-03",
+  "skill-cache-04",
+  "skill-api-05",
+  "skill-db-06",
+] as const;
+
+export function sanitizeSkillId(rawId?: string, fallback: string = "skill-hash-02"): string {
+  if (!rawId) return fallback;
+  const clean = rawId.trim().toLowerCase();
+  if ((VALID_SKILL_IDS as readonly string[]).includes(clean)) return clean;
+  if (clean.includes("data-structure") || clean.includes("ds") || clean.includes("memory") || clean.includes("array")) return "skill-ds-01";
+  if (clean.includes("hash") || clean.includes("collision") || clean.includes("map") || clean.includes("set")) return "skill-hash-02";
+  if (clean.includes("concurr") || clean.includes("thread") || clean.includes("mutex") || clean.includes("race") || clean.includes("lock")) return "skill-concurrency-03";
+  if (clean.includes("cache") || clean.includes("redis") || clean.includes("invalidat") || clean.includes("distribut")) return "skill-cache-04";
+  if (clean.includes("api") || clean.includes("rest") || clean.includes("http") || clean.includes("idempot") || clean.includes("endpoint")) return "skill-api-05";
+  if (clean.includes("db") || clean.includes("database") || clean.includes("sql") || clean.includes("index") || clean.includes("query")) return "skill-db-06";
+  return fallback;
+}
+
 // ==============================================================================
 // 3. PURE SUPABASE EVIDENCE VAULT REPOSITORY
 // ==============================================================================
@@ -267,45 +289,58 @@ export class SupabaseEvidenceRepository implements IEvidenceRepository {
   }
 
   async addEvidence(evidence: EvidenceItem): Promise<EvidenceItem> {
+    const validSkillId = sanitizeSkillId(evidence.skillId);
+    const sanitizedEvidence: EvidenceItem = {
+      ...evidence,
+      skillId: validSkillId,
+    };
+
     const { error } = await supabase.from("evidence_items").insert({
-      id: evidence.id || `ev-${Date.now()}`,
-      user_id: evidence.userId,
-      skill_id: evidence.skillId,
-      type: evidence.type,
-      category: evidence.category,
-      title: evidence.title,
-      source: evidence.source,
-      date_collected: evidence.dateCollected || new Date().toISOString(),
-      reliability_limitations: evidence.reliabilityLimitations,
-      directly_assessed: evidence.directlyAssessed,
-      ai_assistance_allowed: evidence.aiAssistanceAllowed,
-      ai_disclosure_details: evidence.aiDisclosureDetails,
-      notes: evidence.notes,
-      metadata: evidence.metadata || {},
+      id: sanitizedEvidence.id || `ev-${Date.now()}`,
+      user_id: sanitizedEvidence.userId,
+      skill_id: validSkillId,
+      type: sanitizedEvidence.type,
+      category: sanitizedEvidence.category,
+      title: sanitizedEvidence.title,
+      source: sanitizedEvidence.source,
+      date_collected: sanitizedEvidence.dateCollected || new Date().toISOString(),
+      reliability_limitations: sanitizedEvidence.reliabilityLimitations,
+      directly_assessed: sanitizedEvidence.directlyAssessed,
+      ai_assistance_allowed: sanitizedEvidence.aiAssistanceAllowed,
+      ai_disclosure_details: sanitizedEvidence.aiDisclosureDetails,
+      notes: sanitizedEvidence.notes,
+      metadata: sanitizedEvidence.metadata || {},
     });
 
     if (error) {
       console.error("Supabase addEvidence error", error);
     }
-    return evidence;
+    return sanitizedEvidence;
   }
 
   async updateEvidence(evidence: EvidenceItem): Promise<EvidenceItem> {
+    const validSkillId = sanitizeSkillId(evidence.skillId);
+    const sanitizedEvidence: EvidenceItem = {
+      ...evidence,
+      skillId: validSkillId,
+    };
+
     await supabase
       .from("evidence_items")
       .update({
-        title: evidence.title,
-        source: evidence.source,
-        category: evidence.category,
-        reliability_limitations: evidence.reliabilityLimitations,
-        directly_assessed: evidence.directlyAssessed,
-        ai_assistance_allowed: evidence.aiAssistanceAllowed,
-        notes: evidence.notes,
+        skill_id: validSkillId,
+        title: sanitizedEvidence.title,
+        source: sanitizedEvidence.source,
+        category: sanitizedEvidence.category,
+        reliability_limitations: sanitizedEvidence.reliabilityLimitations,
+        directly_assessed: sanitizedEvidence.directlyAssessed,
+        ai_assistance_allowed: sanitizedEvidence.aiAssistanceAllowed,
+        notes: sanitizedEvidence.notes,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", evidence.id);
+      .eq("id", sanitizedEvidence.id);
 
-    return evidence;
+    return sanitizedEvidence;
   }
 
   async deleteEvidence(id: string): Promise<boolean> {
