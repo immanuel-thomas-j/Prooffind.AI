@@ -139,26 +139,37 @@ export const Sidebar: React.FC = () => {
 
   return (
     <>
-      {/* Mobile hamburger button */}
-      <button
-        onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden fixed top-3 left-3 z-50 p-2 rounded-xl bg-white border border-slate-200 shadow-md text-slate-700 active:scale-95 transition-all"
-        aria-label="Toggle sidebar"
-      >
-        {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-      </button>
+      {/* Mobile Top Navigation Header */}
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white/95 backdrop-blur-md border-b border-slate-200/80 z-40 px-4 flex items-center justify-between shadow-2xs">
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-xs">
+            <ShieldCheck className="w-4 h-4" />
+          </div>
+          <span className="font-bold text-sm text-slate-900 tracking-tight">
+            ProofPath<span className="text-blue-600">.AI</span>
+          </span>
+        </Link>
 
-      {/* Mobile overlay */}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200/70 border border-slate-200 text-slate-700 active:scale-95 transition-all"
+          aria-label="Toggle menu"
+        >
+          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </header>
+
+      {/* Mobile Backdrop Overlay */}
       {mobileOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+          className="lg:hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs transition-opacity duration-300"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
-      {/* Mobile sidebar drawer */}
+      {/* Mobile Drawer */}
       <div
-        className={`lg:hidden fixed inset-y-0 left-0 z-50 w-64 p-2 transform transition-transform duration-300 ease-out ${
+        className={`lg:hidden fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] p-3 transform transition-transform duration-300 ease-out shadow-2xl ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
