@@ -103,33 +103,11 @@ export default function OnboardingPage() {
   if (!isLoading && isLoggedIn && profile && !isEditing) {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Top Pipeline Breadcrumb Navigation (from reference design) */}
+        {/* Top Header & Edit Action */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs font-mono">
-            <Link href="/" className="text-slate-500 hover:text-slate-900 transition-colors">
-              Welcome
-            </Link>
-            <span className="text-slate-300">/</span>
-            <Link href="/mentor" className="text-slate-500 hover:text-slate-900 transition-colors">
-              Interview
-            </Link>
-            <span className="text-slate-300">/</span>
-            <Link href="/evidence" className="text-slate-500 hover:text-slate-900 transition-colors">
-              Evidence
-            </Link>
-            <span className="text-slate-300">/</span>
-            <span className="px-3 py-1 rounded-full bg-slate-900 text-white font-semibold flex items-center gap-1.5 shadow-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-              Your profile
-            </span>
-            <span className="text-slate-300">/</span>
-            <Link href="/assessment" className="text-slate-500 hover:text-slate-900 transition-colors">
-              Calibration
-            </Link>
-            <span className="text-slate-300">/</span>
-            <Link href="/path" className="text-slate-500 hover:text-slate-900 transition-colors">
-              Roadmap
-            </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Profile & Competence Claims</h1>
+            <p className="text-xs text-slate-500 mt-0.5">Calibrate self-reported skills against live evidence and system requirements.</p>
           </div>
 
           <button
