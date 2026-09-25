@@ -1,0 +1,326 @@
+"use client";
+
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../lib/supabaseClient";
+import { learnerRepo } from "../repositories/supabase/supabaseStore";
+import { LearnerProfile } from "../domain/types";
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+}
+
+interface AuthContextType {
+  user: AuthUser | null;
+  profile: LearnerProfile | null;
+  isLoggedIn: boolean;
+  isLoading: boolean;
+  login: (email: string, password?: string) => Promise<{ success: boolean; error?: string }>;
+  signUp: (email: string, password: string, name: string, targetRole?: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const AUTH_USER_KEY = "proofpath_auth_user_session";
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const router = useRouter();
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [profile, setProfile] = useState<LearnerProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Initialize Auth State on Mount
+  useEffect(() => {
+    async function initAuth() {
+      try {
+        // 1. Check Supabase Auth session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        let activeUserId: string | null = null;
+        let activeEmail = "";
+        let activeName = "";
+
+        if (session?.user) {
+          activeUserId = session.user.id;
+          activeEmail = session.user.email || "";
+          activeName = session.user.user_metadata?.name || activeEmail.split("@")[0] || "Learner";
+        } else if (typeof window !== "undefined") {
+          // Check local stored session token
+          const stored = localStorage.getItem(AUTH_USER_KEY);
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored);
+              activeUserId = parsed.id;
+              activeEmail = parsed.email;
+              activeName = parsed.name;
+            } catch (_) {}
+          }
+        }
+
+        if (activeUserId) {
+          const authUser: AuthUser = {
+            id: activeUserId,
+            email: activeEmail,
+            name: activeName,
+          };
+          setUser(authUser);
+
+          // Fetch only this user's profile from Supabase
+          const prof = await learnerRepo.getProfile(activeUserId);
+          setProfile(prof);
+        } else {
+          setUser(null);
+          setProfile(null);
+        }
+      } catch (err) {
+        console.error("Auth initialization error", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    initAuth();
+
+    // Listen to Supabase Auth State Changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const authUser: AuthUser = {
+          id: session.user.id,
+          email: session.user.email || "",
+          name: session.user.user_metadata?.name || session.user.email?.split("@")[0] || "Learner",
+        };
+        setUser(authUser);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(AUTH_USER_KEY, JSON.stringify(authUser));
+        }
+        const prof = await learnerRepo.getProfile(session.user.id);
+        setProfile(prof);
+      } else if (event === "SIGNED_OUT") {
+        setUser(null);
+        setProfile(null);
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(AUTH_USER_KEY);
+        }
+      }
+    });
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
+
+  const refreshProfile = async () => {
+    if (!user) return;
+    const prof = await learnerRepo.getProfile(user.id);
+    setProfile(prof);
+  };
+
+  const login = async (email: string, password?: string): Promise<{ success: boolean; error?: string }> => {
+    setIsLoading(true);
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      if (!cleanEmail) {
+        return { success: false, error: "Please enter your email address." };
+      }
+
+      if (password && password.length >= 6) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password,
+        });
+
+        if (error) {
+          // If direct password fails on Supabase Auth, report exact error or check custom user record
+          console.warn("Supabase auth notice:", error.message);
+          return { success: false, error: error.message || "Invalid credentials." };
+        }
+
+        if (data?.user) {
+          const activeUserId = data.user.id;
+          const authName = data.user.user_metadata?.name || cleanEmail.split("@")[0];
+          const authUser: AuthUser = {
+            id: activeUserId,
+            email: data.user.email || cleanEmail,
+            name: authName,
+          };
+          setUser(authUser);
+          if (typeof window !== "undefined") {
+            localStorage.setItem(AUTH_USER_KEY, JSON.stringify(authUser));
+          }
+
+          // Ensure user record exists in users table
+          await supabase.from("users").upsert({
+            id: activeUserId,
+            email: cleanEmail,
+            name: authName,
+            role: "learner",
+            updated_at: new Date().toISOString(),
+          }, { onConflict: "id" });
+
+          const prof = await learnerRepo.getProfile(activeUserId);
+          setProfile(prof);
+          return { success: true };
+        }
+      }
+
+      // Email login fallback
+      const derivedId = `user-${cleanEmail.replace(/[^a-z0-9]/g, "-")}`;
+      const name = cleanEmail.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+      await supabase.from("users").upsert({
+        id: derivedId,
+        email: cleanEmail,
+        name,
+        role: "learner",
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "id" });
+
+      const authUser: AuthUser = {
+        id: derivedId,
+        email: cleanEmail,
+        name,
+      };
+
+      setUser(authUser);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(AUTH_USER_KEY, JSON.stringify(authUser));
+      }
+
+      const prof = await learnerRepo.getProfile(derivedId);
+      setProfile(prof);
+
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Failed to log in." };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signUp = async (
+    email: string,
+    password: string,
+    name: string,
+    targetRole: string = "Software Engineer"
+  ): Promise<{ success: boolean; error?: string }> => {
+    setIsLoading(true);
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      if (!cleanEmail) {
+        return { success: false, error: "Please enter your email address." };
+      }
+      if (!name.trim()) {
+        return { success: false, error: "Please enter your full name." };
+      }
+
+      let activeUserId = `user-${cleanEmail.replace(/[^a-z0-9]/g, "-")}`;
+
+      // Supabase auth signup attempt
+      if (password && password.length >= 6) {
+        const { data, error } = await supabase.auth.signUp({
+          email: cleanEmail,
+          password,
+          options: { data: { name: name.trim() } },
+        });
+
+        if (error) {
+          console.warn("Supabase auth signup notice:", error.message);
+          if (!error.message.toLowerCase().includes("already registered")) {
+            return { success: false, error: error.message };
+          }
+        }
+
+        if (data?.user?.id) {
+          activeUserId = data.user.id;
+        }
+      }
+
+      // Upsert into users table
+      await supabase.from("users").upsert({
+        id: activeUserId,
+        email: cleanEmail,
+        name: name.trim(),
+        role: "learner",
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "id" });
+
+      const newProfile: LearnerProfile = {
+        id: `profile-${activeUserId}`,
+        userId: activeUserId,
+        name: name.trim(),
+        targetRole: targetRole || "Software Engineer",
+        learningGoal: `Validate genuine ${targetRole || "engineering"} competencies.`,
+        experienceLevel: "Intermediate",
+        programmingLanguages: ["TypeScript", "Python"],
+        selfReportedSkills: ["Core Data Structures & Memory Layouts"],
+        preferredLearningHoursPerWeek: 10,
+        aiAssistancePreference: "balanced",
+        isDemoUser: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await learnerRepo.saveProfile(newProfile);
+
+      const authUser: AuthUser = {
+        id: activeUserId,
+        email: cleanEmail,
+        name: name.trim(),
+      };
+
+      setUser(authUser);
+      setProfile(newProfile);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(AUTH_USER_KEY, JSON.stringify(authUser));
+      }
+
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Sign up failed." };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (_) {}
+
+    setUser(null);
+    setProfile(null);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(AUTH_USER_KEY);
+    }
+    router.push("/login");
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        profile,
+        isLoggedIn: !!user,
+        isLoading,
+        login,
+        signUp,
+        logout,
+        refreshProfile,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
