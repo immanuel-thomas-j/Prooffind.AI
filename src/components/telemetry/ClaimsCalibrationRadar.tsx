@@ -117,10 +117,10 @@ export const ClaimsCalibrationRadar: React.FC<ClaimsCalibrationRadarProps> = ({
   }, [skills, analysis, profile]);
 
   // SVG Geometry for Triangle Radar (Calculated with generous boundary padding)
-  // Center: (150, 115), Radius: 68
-  const cx = 150;
+  // Center: (170, 115), Radius: 62
+  const cx = 170;
   const cy = 115;
-  const R = 68;
+  const R = 62;
 
   // Angles in radians:
   // Top: -PI/2 (Foundations)
@@ -215,8 +215,8 @@ export const ClaimsCalibrationRadar: React.FC<ClaimsCalibrationRadarProps> = ({
 
           {/* Center Column: Radar Chart (4 cols) */}
           <div className="lg:col-span-4 flex items-center justify-center">
-            <div className="relative p-3 bg-slate-950 text-white rounded-2xl border border-slate-800 shadow-md">
-              <svg width="280" height="230" viewBox="0 0 300 250" className="overflow-visible select-none">
+            <div className="relative p-4 bg-slate-950 text-white rounded-2xl border border-slate-800 shadow-md w-full max-w-[320px] flex items-center justify-center overflow-hidden">
+              <svg width="100%" height="210" viewBox="0 0 340 230" className="overflow-visible select-none">
                 {/* Concentric Guide Triangles */}
                 {[0.33, 0.66, 1.0].map((step, idx) => {
                   const pts = polyString(step, step, step);
@@ -276,25 +276,25 @@ export const ClaimsCalibrationRadar: React.FC<ClaimsCalibrationRadarProps> = ({
                 {/* Axis Labels */}
                 <text
                   x={cx}
-                  y={cy - R - 10}
+                  y={cy - R - 12}
                   textAnchor="middle"
-                  className="fill-slate-200 font-mono text-[10.5px] font-semibold tracking-wider"
+                  className="fill-slate-200 font-mono text-[11px] font-semibold tracking-wider"
                 >
                   Foundations
                 </text>
                 <text
-                  x={cx + R * Math.cos(angleCore) + 8}
-                  y={cy + R * Math.sin(angleCore) + 16}
-                  textAnchor="middle"
-                  className="fill-slate-200 font-mono text-[10.5px] font-semibold tracking-wider"
+                  x={cx + R * Math.cos(angleCore) + 12}
+                  y={cy + R * Math.sin(angleCore) + 18}
+                  textAnchor="end"
+                  className="fill-slate-200 font-mono text-[11px] font-semibold tracking-wider"
                 >
                   Core practice
                 </text>
                 <text
-                  x={cx + R * Math.cos(angleApplied) - 8}
-                  y={cy + R * Math.sin(angleApplied) + 16}
-                  textAnchor="middle"
-                  className="fill-slate-200 font-mono text-[10.5px] font-semibold tracking-wider"
+                  x={cx + R * Math.cos(angleApplied) - 12}
+                  y={cy + R * Math.sin(angleApplied) + 18}
+                  textAnchor="start"
+                  className="fill-slate-200 font-mono text-[11px] font-semibold tracking-wider"
                 >
                   Applied work
                 </text>
