@@ -153,45 +153,6 @@ function DashboardContent() {
         </div>
       </div>
 
-      {/* 4 Evidence Tier Telemetry Metric Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-xs">
-          <div className="flex items-center justify-between mb-1 font-mono text-[11px]">
-            <span className="font-semibold text-slate-500 uppercase">CLAIMED</span>
-            <Badge type="category" value="CLAIMED" size="sm" />
-          </div>
-          <p className="text-2xl font-bold font-mono text-slate-900">{claimedCount}</p>
-          <p className="text-[11px] text-slate-500 mt-1 font-sans">Self-reported claims</p>
-        </div>
-
-        <div className="bg-white border border-sky-200 p-4 rounded-xl shadow-xs">
-          <div className="flex items-center justify-between mb-1 font-mono text-[11px]">
-            <span className="font-semibold text-sky-700 uppercase">INFERRED</span>
-            <Badge type="category" value="INFERRED" size="sm" />
-          </div>
-          <p className="text-2xl font-bold font-mono text-sky-700">{inferredCount}</p>
-          <p className="text-[11px] text-slate-500 mt-1 font-sans">Indirect repos & stats</p>
-        </div>
-
-        <div className="bg-white border border-amber-200 p-4 rounded-xl shadow-xs">
-          <div className="flex items-center justify-between mb-1 font-mono text-[11px]">
-            <span className="font-semibold text-amber-700 uppercase">VERIFIED</span>
-            <Badge type="category" value="VERIFIED" size="sm" />
-          </div>
-          <p className="text-2xl font-bold font-mono text-amber-700">{verifiedCount}</p>
-          <p className="text-[11px] text-slate-500 mt-1 font-sans">Controlled modifications</p>
-        </div>
-
-        <div className="bg-emerald-50/50 border border-emerald-300 p-4 rounded-xl shadow-xs">
-          <div className="flex items-center justify-between mb-1 font-mono text-[11px]">
-            <span className="font-semibold text-emerald-800 uppercase">PROVEN</span>
-            <Badge type="category" value="PROVEN" size="sm" />
-          </div>
-          <p className="text-2xl font-bold font-mono text-emerald-800">{provenCount}</p>
-          <p className="text-[11px] text-slate-600 mt-1 font-sans">Directly evaluated & transferred</p>
-        </div>
-      </div>
-
       {/* Claims vs Evidence vs Requirement Radar & Gaps Calibration */}
       <ClaimsCalibrationRadar
         profile={profile}
