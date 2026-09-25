@@ -179,110 +179,107 @@ export const ClaimsCalibrationRadar: React.FC<ClaimsCalibrationRadarProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* 2 Main Hero Calibration Cards (Dark aesthetic from uploaded reference) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Left Card: Claims vs evidence vs requirement Radar */}
-        <div className="bg-[#0B0F17] text-white border border-slate-800 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
-          <div>
-            <h2 className="text-base sm:text-lg font-bold tracking-tight text-white mb-1">
-              Claims vs evidence vs requirement
-            </h2>
-            <p className="text-xs text-slate-400 leading-relaxed font-sans mb-4">
-              <span className="text-amber-400 font-semibold">Amber</span> = what you claim •{" "}
-              <span className="text-emerald-400 font-semibold">green</span> = what your data proves •{" "}
-              <span className="text-rose-400 font-semibold">red dashes</span> = what your goal demands.
-            </p>
+      {/* Main Hero Calibration Card */}
+      <div className="bg-[#0B0F17] text-white border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-base sm:text-lg font-bold tracking-tight text-white mb-1">
+            Claims vs evidence vs requirement
+          </h2>
+          <p className="text-xs text-slate-400 leading-relaxed font-sans mb-3">
+            <span className="text-amber-400 font-semibold">Amber</span> = what you claim •{" "}
+            <span className="text-emerald-400 font-semibold">green</span> = what your data proves •{" "}
+            <span className="text-rose-400 font-semibold">red dashes</span> = what your goal demands.
+          </p>
 
-            {/* Radar Spider/Triangle Chart */}
-            <div className="relative flex items-center justify-center py-2">
-              <svg width="300" height="250" viewBox="0 0 300 250" className="overflow-visible select-none">
-                {/* Concentric Guide Triangles */}
-                {[0.33, 0.66, 1.0].map((step, idx) => {
-                  const pts = polyString(step, step, step);
-                  return (
-                    <polygon
-                      key={idx}
-                      points={pts}
-                      fill="none"
-                      stroke="#1E293B"
-                      strokeWidth={idx === 2 ? "1.5" : "1"}
-                      strokeDasharray={idx < 2 ? "3 3" : undefined}
-                    />
-                  );
-                })}
+          {/* Radar Spider/Triangle Chart */}
+          <div className="relative flex items-center justify-center py-2">
+            <svg width="340" height="260" viewBox="0 0 340 260" className="overflow-visible select-none">
+              {/* Concentric Guide Triangles */}
+              {[0.33, 0.66, 1.0].map((step, idx) => {
+                const pts = polyString(step, step, step);
+                return (
+                  <polygon
+                    key={idx}
+                    points={pts}
+                    fill="none"
+                    stroke="#1E293B"
+                    strokeWidth={idx === 2 ? "1.5" : "1"}
+                    strokeDasharray={idx < 2 ? "3 3" : undefined}
+                  />
+                );
+              })}
 
-                {/* Radial Axis Lines */}
-                {[angleFoundations, angleCore, angleApplied].map((ang, i) => {
-                  const outer = getPoint(1.0, ang);
-                  return (
-                    <line
-                      key={i}
-                      x1={cx}
-                      y1={cy}
-                      x2={outer.x}
-                      y2={outer.y}
-                      stroke="#334155"
-                      strokeWidth="1"
-                    />
-                  );
-                })}
+              {/* Radial Axis Lines */}
+              {[angleFoundations, angleCore, angleApplied].map((ang, i) => {
+                const outer = getPoint(1.0, ang);
+                return (
+                  <line
+                    key={i}
+                    x1={cx}
+                    y1={cy}
+                    x2={outer.x}
+                    y2={outer.y}
+                    stroke="#334155"
+                    strokeWidth="1"
+                  />
+                );
+              })}
 
-                {/* 1. Required Area (Red dashed) */}
-                <polygon
-                  points={requiredPolygon}
-                  fill="rgba(239, 68, 68, 0.08)"
-                  stroke="#EF4444"
-                  strokeWidth="1.8"
-                  strokeDasharray="4 4"
-                />
+              {/* 1. Required Area (Red dashed) */}
+              <polygon
+                points={requiredPolygon}
+                fill="rgba(239, 68, 68, 0.08)"
+                stroke="#EF4444"
+                strokeWidth="1.8"
+                strokeDasharray="4 4"
+              />
 
-                {/* 2. Claimed Area (Amber) */}
-                <polygon
-                  points={claimedPolygon}
-                  fill="rgba(245, 158, 11, 0.28)"
-                  stroke="#F59E0B"
-                  strokeWidth="1.8"
-                />
+              {/* 2. Claimed Area (Amber) */}
+              <polygon
+                points={claimedPolygon}
+                fill="rgba(245, 158, 11, 0.28)"
+                stroke="#F59E0B"
+                strokeWidth="1.8"
+              />
 
-                {/* 3. Evidenced Area (Green) */}
-                <polygon
-                  points={evidencedPolygon}
-                  fill="rgba(16, 185, 129, 0.45)"
-                  stroke="#10B981"
-                  strokeWidth="2"
-                />
+              {/* 3. Evidenced Area (Green) */}
+              <polygon
+                points={evidencedPolygon}
+                fill="rgba(16, 185, 129, 0.45)"
+                stroke="#10B981"
+                strokeWidth="2"
+              />
 
-                {/* Axis Labels */}
-                <text
-                  x={cx}
-                  y={cy - R - 14}
-                  textAnchor="middle"
-                  className="fill-slate-300 font-mono text-[11px] font-semibold tracking-wider"
-                >
-                  Foundations
-                </text>
-                <text
-                  x={cx + R * Math.cos(angleCore) + 12}
-                  y={cy + R * Math.sin(angleCore) + 14}
-                  textAnchor="start"
-                  className="fill-slate-300 font-mono text-[11px] font-semibold tracking-wider"
-                >
-                  Core practice
-                </text>
-                <text
-                  x={cx + R * Math.cos(angleApplied) - 12}
-                  y={cy + R * Math.sin(angleApplied) + 14}
-                  textAnchor="end"
-                  className="fill-slate-300 font-mono text-[11px] font-semibold tracking-wider"
-                >
-                  Applied work
-                </text>
-              </svg>
-            </div>
+              {/* Axis Labels */}
+              <text
+                x={cx}
+                y={cy - R - 14}
+                textAnchor="middle"
+                className="fill-slate-300 font-mono text-[11px] font-semibold tracking-wider"
+              >
+                Foundations
+              </text>
+              <text
+                x={cx + R * Math.cos(angleCore) + 12}
+                y={cy + R * Math.sin(angleCore) + 14}
+                textAnchor="start"
+                className="fill-slate-300 font-mono text-[11px] font-semibold tracking-wider"
+              >
+                Core practice
+              </text>
+              <text
+                x={cx + R * Math.cos(angleApplied) - 12}
+                y={cy + R * Math.sin(angleApplied) + 14}
+                textAnchor="end"
+                className="fill-slate-300 font-mono text-[11px] font-semibold tracking-wider"
+              >
+                Applied work
+              </text>
+            </svg>
           </div>
 
           {/* Legend */}
-          <div className="flex flex-wrap items-center justify-center gap-5 pt-3 border-t border-slate-800 text-xs font-mono">
+          <div className="flex flex-wrap items-center justify-center gap-6 pt-3 border-t border-slate-800 text-xs font-mono">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-xs bg-amber-500" />
               <span className="text-slate-300">Claimed</span>
@@ -295,75 +292,6 @@ export const ClaimsCalibrationRadar: React.FC<ClaimsCalibrationRadarProps> = ({
               <span className="w-3 h-0.5 border-t-2 border-dashed border-rose-500" />
               <span className="text-slate-300">Required</span>
             </div>
-          </div>
-        </div>
-
-        {/* Right Card: Evidence tiers */}
-        <div className="bg-[#0B0F17] text-white border border-slate-800 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
-          <div className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between">
-                <h2 className="text-base sm:text-lg font-bold tracking-tight text-white">
-                  Evidence tiers
-                </h2>
-                {onEditProfile && (
-                  <button
-                    onClick={onEditProfile}
-                    className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
-                  >
-                    Edit Claims
-                  </button>
-                )}
-              </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                How each skill belief is backed right now.
-              </p>
-            </div>
-
-            {/* Tier Rows */}
-            <div className="space-y-2.5 pt-1">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-800/80">
-                <div>
-                  <span className="text-xs font-bold text-white block">Proven</span>
-                  <span className="text-[11px] text-slate-400 font-sans">
-                    Real artefacts (GitHub, contexts)
-                  </span>
-                </div>
-                <span className="font-mono text-xl font-bold text-emerald-400">{provenCount}</span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-800/80">
-                <div>
-                  <span className="text-xs font-bold text-white block">Verified</span>
-                  <span className="text-[11px] text-slate-400 font-sans">Confirmed by assessment</span>
-                </div>
-                <span className="font-mono text-xl font-bold text-sky-400">{verifiedCount}</span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-800/80">
-                <div>
-                  <span className="text-xs font-bold text-white block">Claimed</span>
-                  <span className="text-[11px] text-slate-400 font-sans">Self-reported only</span>
-                </div>
-                <span className="font-mono text-xl font-bold text-amber-400">{claimedCount}</span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-800/80">
-                <div>
-                  <span className="text-xs font-bold text-white block">Inferred</span>
-                  <span className="text-[11px] text-slate-400 font-sans">Weak signals</span>
-                </div>
-                <span className="font-mono text-xl font-bold text-slate-400">{inferredCount}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Alert Callout */}
-          <div className="mt-4 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200/90 leading-relaxed font-sans">
-            <span className="font-semibold text-amber-300">
-              {skillsGap.length} skill{skillsGap.length === 1 ? "" : "s"} show a claim-evidence gap.
-            </span>{" "}
-            The next step will audit these competencies with a structured calibration assessment.
           </div>
         </div>
       </div>
