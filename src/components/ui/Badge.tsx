@@ -38,6 +38,12 @@ export const Badge: React.FC<BadgeProps> = ({ type, value, size = "md", classNam
             <span>INFERRED</span>
           </span>
         );
+      case "UNCLAIMED":
+        return (
+          <span className={`inline-flex items-center gap-1.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200 font-medium ${sizeClasses} ${className}`}>
+            <span>UNCLAIMED</span>
+          </span>
+        );
       case "CLAIMED":
       default:
         return (

@@ -80,6 +80,7 @@ export class EvidenceService {
     evidenceList: EvidenceItem[]
   ): SkillAnalysisSummary[] {
     const categoryWeights: Record<EvidenceCategory, number> = {
+      UNCLAIMED: 0,
       CLAIMED: 1,
       INFERRED: 2,
       VERIFIED: 3,
@@ -107,7 +108,7 @@ export class EvidenceService {
       const skillEvidence = evidenceList.filter((ev) => ev.skillId === skill.id);
 
       // Determine highest evidence category attained
-      let highestCategory: EvidenceCategory = isClaimed ? "CLAIMED" : "CLAIMED";
+      let highestCategory: EvidenceCategory = isClaimed ? "CLAIMED" : "UNCLAIMED";
       let highestWeight = isClaimed ? 1 : 0;
 
       for (const item of skillEvidence) {

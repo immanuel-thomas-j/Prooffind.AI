@@ -3,7 +3,7 @@
  * Strictly typed entities adhering to the Supabase-ready architecture.
  */
 
-export type EvidenceCategory = "CLAIMED" | "INFERRED" | "VERIFIED" | "PROVEN";
+export type EvidenceCategory = "CLAIMED" | "INFERRED" | "VERIFIED" | "PROVEN" | "UNCLAIMED";
 
 export type EvidenceType =
   | "SELF_REPORTED"

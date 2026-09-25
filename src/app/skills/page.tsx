@@ -213,7 +213,7 @@ function SkillsContent() {
                         <div className="flex items-center justify-between pt-1">
                           <Badge
                             type="category"
-                            value={analysis?.highestCategory || "CLAIMED"}
+                            value={analysis?.highestCategory || "UNCLAIMED"}
                             size="sm"
                           />
                           {isAncestor && (
@@ -259,7 +259,7 @@ function SkillsContent() {
                         <div className="flex items-center justify-between pt-1">
                           <Badge
                             type="category"
-                            value={analysis?.highestCategory || "CLAIMED"}
+                            value={analysis?.highestCategory || "UNCLAIMED"}
                             size="sm"
                           />
                           {analysis?.hasDiscrepancy && (
@@ -307,7 +307,7 @@ function SkillsContent() {
                         <div className="flex items-center justify-between pt-1">
                           <Badge
                             type="category"
-                            value={analysis?.highestCategory || "CLAIMED"}
+                            value={analysis?.highestCategory || "UNCLAIMED"}
                             size="sm"
                           />
                           {analysis?.hasDiscrepancy && (
@@ -432,7 +432,7 @@ function SkillsContent() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge type="category" value={analysis?.highestCategory || "CLAIMED"} size="sm" />
+                    <Badge type="category" value={analysis?.highestCategory || "UNCLAIMED"} size="sm" />
                     <Badge type="status" value={analysis?.competenceStatus || "NOT_ASSESSED"} size="sm" />
                   </div>
                 </div>
