@@ -91,10 +91,10 @@ function DashboardContent() {
     );
   }
 
-  const claimedCount = evidenceList.filter((e) => e.category === "CLAIMED").length;
-  const inferredCount = evidenceList.filter((e) => e.category === "INFERRED").length;
-  const verifiedCount = evidenceList.filter((e) => e.category === "VERIFIED").length;
-  const provenCount = evidenceList.filter((e) => e.category === "PROVEN").length;
+  const claimedCount = analyses.filter((a) => a.highestCategory === "CLAIMED").length;
+  const inferredCount = analyses.filter((a) => a.highestCategory === "INFERRED").length;
+  const verifiedCount = analyses.filter((a) => a.highestCategory === "VERIFIED").length;
+  const provenCount = analyses.filter((a) => a.highestCategory === "PROVEN").length;
 
   const discrepancies = analyses.filter((a) => a.hasDiscrepancy);
 

@@ -40,21 +40,21 @@ export const ClaimsCalibrationRadar: React.FC<ClaimsCalibrationRadarProps> = ({
 
   // Evidence tier counts
   const provenCount = useMemo(
-    () => evidenceList.filter((e) => e.category === "PROVEN").length,
-    [evidenceList]
+    () => analysis.filter((a) => a.highestCategory === "PROVEN").length,
+    [analysis]
   );
   const verifiedCount = useMemo(
-    () => evidenceList.filter((e) => e.category === "VERIFIED").length,
-    [evidenceList]
+    () => analysis.filter((a) => a.highestCategory === "VERIFIED").length,
+    [analysis]
   );
   const inferredCount = useMemo(
-    () => evidenceList.filter((e) => e.category === "INFERRED").length,
-    [evidenceList]
+    () => analysis.filter((a) => a.highestCategory === "INFERRED").length,
+    [analysis]
   );
-  const claimedCount = useMemo(() => {
-    const list = profile?.selfReportedSkills || [];
-    return list.length > 0 ? list.length : evidenceList.filter((e) => e.category === "CLAIMED").length;
-  }, [profile, evidenceList]);
+  const claimedCount = useMemo(
+    () => analysis.filter((a) => a.highestCategory === "CLAIMED").length,
+    [analysis]
+  );
 
   // Group skills into 3 axes for the Radar:
   // 1. Foundations (Computer Science / Fundamental)
