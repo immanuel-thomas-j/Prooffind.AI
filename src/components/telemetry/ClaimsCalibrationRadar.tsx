@@ -72,35 +72,34 @@ export const ClaimsCalibrationRadar: React.FC<ClaimsCalibrationRadarProps> = ({
     );
 
     const calcAxis = (axisSkills: Skill[]) => {
-      if (axisSkills.length === 0) return { claimed: 0.2, evidenced: 0.1, required: 0.85 };
+      if (axisSkills.length === 0) return { claimed: 0.05, evidenced: 0.05, required: 0.85 };
 
       const ids = new Set(axisSkills.map((s) => s.id));
       const axisAnalysis = analysis.filter((a) => ids.has(a.skillId));
 
-      // Claimed ratio (claimed skills in axis / total axis skills)
-      const claimedSkillsCount = axisAnalysis.filter((a) => {
-        const isSelfReported = (profile?.selfReportedSkills || []).some((claim) =>
-          a.skillName.toLowerCase().includes(claim.toLowerCase()) ||
-          claim.toLowerCase().includes(a.skillName.toLowerCase())
-        );
-        return isSelfReported || a.highestCategory === "CLAIMED";
-      }).length;
+      // 1. Claimed ratio: skills in this axis claimed by the user (or with evidence)
+      const claimedSkillsCount = axisAnalysis.filter(
+        (a) => a.highestCategory !== "UNCLAIMED"
+      ).length;
 
-      const claimedRatio = Math.min(1, Math.max(0.2, claimedSkillsCount / axisSkills.length));
+      const claimedRatio = axisSkills.length > 0
+        ? claimedSkillsCount === 0
+          ? 0.05
+          : Math.min(1, Math.max(0.15, claimedSkillsCount / axisSkills.length))
+        : 0.05;
 
-      // Evidenced ratio (VERIFIED or PROVEN skills / total axis skills)
+      // 2. Evidenced ratio: skills in this axis with VERIFIED or PROVEN evidence
       const evidencedSkillsCount = axisAnalysis.filter(
         (a) => a.highestCategory === "VERIFIED" || a.highestCategory === "PROVEN"
       ).length;
 
-      const evidencedRatio = Math.min(
-        1,
-        evidencedSkillsCount > 0
-          ? Math.max(0.25, (evidencedSkillsCount / axisSkills.length) * 0.95)
-          : 0.08
-      );
+      const evidencedRatio = axisSkills.length > 0
+        ? evidencedSkillsCount === 0
+          ? 0.05
+          : Math.min(1, Math.max(0.15, evidencedSkillsCount / axisSkills.length))
+        : 0.05;
 
-      // Required target based on role
+      // 3. Required target based on role
       const requiredRatio = profile?.experienceLevel === "Advanced" ? 0.95 : 0.85;
 
       return {
